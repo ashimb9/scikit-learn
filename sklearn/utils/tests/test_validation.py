@@ -158,11 +158,21 @@ def test_check_array():
     X_inf[0, 0] = np.inf
     assert_raises(ValueError, check_array, X_inf)
     check_array(X_inf, force_all_finite=False)  # no raise
+    check_array(X_inf, force_all_finite="accept_inf")  # no raise
+    msg_inf = "Input contains infinity."
+    assert_raise_message(ValueError, msg_inf, check_array,
+                         X_inf, force_all_finite="accept_nan")
+
     # nan check
     X_nan = np.arange(4).reshape(2, 2).astype(np.float)
     X_nan[0, 0] = np.nan
     assert_raises(ValueError, check_array, X_nan)
     check_array(X_inf, force_all_finite=False)  # no raise
+    check_array(X_nan, force_all_finite=False)  # no raise
+    check_array(X_nan, force_all_finite="accept_nan")  # no raise
+    msg_nan = "Input contains NaN."
+    assert_raise_message(ValueError, msg_nan, check_array,
+                         X_nan, force_all_finite="accept_inf")
 
     # dtype and order enforcement.
     X_C = np.arange(4).reshape(2, 2).copy("C")

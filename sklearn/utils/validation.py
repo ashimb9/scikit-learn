@@ -359,8 +359,11 @@ def check_array(array, accept_sparse=False, dtype="numeric", order=None,
         Whether a forced copy will be triggered. If copy=False, a copy might
         be triggered by a conversion.
 
-    force_all_finite : boolean (default=True)
-        Whether to raise an error on np.inf and np.nan in X.
+    force_all_finite : boolean or string (default=True)
+        Whether to raise an error on np.inf and np.nan in X. If 'True',
+        then raises error for both, 'False' does not raise for either,
+        'accept_nan' only raises if np.inf is present and 'accept_inf' only
+        raises if np.nan is present.
 
     ensure_2d : boolean (default=True)
         Whether to raise a value error if X is not 2d.
@@ -482,8 +485,12 @@ def check_array(array, accept_sparse=False, dtype="numeric", order=None,
         if not allow_nd and array.ndim >= 3:
             raise ValueError("Found array with dim %d. %s expected <= 2."
                              % (array.ndim, estimator_name))
-        if force_all_finite:
+        if force_all_finite is True:
             _assert_all_finite(array)
+        if force_all_finite == "accept_nan" and np.any(np.isinf(array)):
+            raise ValueError("Input contains infinity.")
+        if force_all_finite == "accept_inf" and np.any(np.isnan(array)):
+            raise ValueError("Input contains NaN.")
 
     shape_repr = _shape_repr(array.shape)
     if ensure_min_samples > 0:
